@@ -1,23 +1,19 @@
-const dotenv = require("dotenv");
+const pool = require("./config/connect");
+const express = require("express");
+const app = express();
+const cors = require("cors");
+const {response} = require("express");
+const schedule = require("node-schedule");
+const authRoutes = require("./routes/authRoutes");
 
-dotenv.config();
+app.use(cors());
+app.use(express.json());
 
-const { Pool} = require("pg");
+// login routes
 
-const pool = new Pool ({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT
-});
+app.use("/api/auth", authRoutes);
 
-pool.connect()
-.then(() => {
-    console.log("✅ Connected to PostgreSQL")
-})
-.catch((err) => {
-    console.error("❌ Failed to connect to PostgreSQL", err)
-})
+app.listen(process.env.PORT || 5050,  () => {
+     console.log(`✅ Server started on port ${process.env.PORT || 5050}`);
+    });
 
-module.exports = pool;
