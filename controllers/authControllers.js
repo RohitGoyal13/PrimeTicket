@@ -16,9 +16,9 @@ const generateToken = (userId, email) => {
 // REGISTER 
 
 exports.register = async (req, res) => {
-    const {firstName,lastName,email,contactNo,password} = req.body;
+    const {firstName,lastName,email,contactno,password} = req.body;
 
-    if(!firstName || !lastName || !email || !contactNo || !password){
+    if(!firstName || !lastName || !email || !contactno || !password){
         return res.status(400).json({
             success: false,
             message: "Please fill all the fields"
@@ -38,7 +38,7 @@ exports.register = async (req, res) => {
        const hashedPassword = await bcrypt.hash(password, 10);
 
        await pool.query("INSERT INTO USERS (firstname, lastname , email, contactno, password) VALUES ($1, $2, $3, $4, $5)",
-         [firstName.toLowerCase(), lastName.toLowerCase(), email, contactNo, hashedPassword]);
+         [firstName.toLowerCase(), lastName.toLowerCase(), email, contactno, hashedPassword]);
 
        return res.status(200).json({
            success: true,
@@ -111,7 +111,9 @@ exports.changePassword = async (req, res) => {
 
 const {oldPassword, newPassword} = req.body;
 
-const userId = req.user.userid;
+const userId = req.user.userId;
+
+console.log("Decoded token payload:", req.user);
 
 if(!oldPassword || !newPassword){
     return res.status(400).json({
