@@ -1,0 +1,14 @@
+const express = require("express");
+const router = express.Router();
+const {adminLogin} = require("../controllers/adminControllers");
+const {protectAdmin} = require("../middleware/adminMiddleware");
+
+
+router.post("/login" , adminLogin);
+
+router.get("/", protectAdmin, (req, res) => {
+    res.status(200).json({success: true, message: "Welcome to admin dashboard"});
+});
+
+module.exports = router;
+

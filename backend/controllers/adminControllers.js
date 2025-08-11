@@ -37,7 +37,11 @@ exports.adminLogin = async (req, res) => {
             })
         }
 
-        const token = generateToken(admin.adminid, admin.adminemail);
+        const token = generateToken({
+             id: admin.adminid,
+             email: admin.adminemail,
+             role: "admin"
+            });
         res.status(200).json({
             success: true,
             message: "Admin logged in successfully",
@@ -52,3 +56,5 @@ exports.adminLogin = async (req, res) => {
         })
     }
 };
+
+
