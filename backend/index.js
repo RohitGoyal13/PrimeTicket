@@ -7,6 +7,7 @@ const schedule = require("node-schedule");
 const authRoutes = require("./routes/authRoutes");
 const {protectAdmin} = require("./middleware/adminMiddleware");
  const adminRoutes = require("./routes/adminRoutes");
+ const trainRoutes = require("./routes/trainRoutes");
 
 app.use(cors());
 app.use(express.json());
@@ -15,6 +16,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/trains", trainRoutes);
 
 app.listen(process.env.PORT || 5050,  () => {
      console.log(`✅ Server started on port ${process.env.PORT || 5050}`);
