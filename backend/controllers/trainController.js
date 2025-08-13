@@ -310,5 +310,23 @@ exports.getRoute = async (req, res) => {
     }
 };
 
+exports.deleteTrain = async (req,res) => {
+    try {
+        const { tid } = req.body;
+        await pool.query("DELETE FROM routes WHERE trainid = $1;", [tid]);
+        await pool.query("DELETE FROM trains WHERE trainid = $1;", [tid]);
+        return res.status(200).json({
+            success: true,
+            message: "Train deleted successfully"
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+}
+
 
 
