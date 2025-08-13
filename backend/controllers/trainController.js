@@ -224,48 +224,44 @@ exports.addTrain = async (req, res) => {
 
 
 exports.getRoute = async (req, res) => {
-    let details = {
-        flag : false,
-    };
+    let details = { flag: false };
     const haltmin = 10;
 
-    try{
-        const {tid} = req.body;
-
-        if(!tid) {
+    try {
+        const { tid } = req.body;
+        if (!tid) {
             return res.status(400).json({
                 success: false,
-                message: "Please fill all the fields"
+                message: "Please provide train ID"
             });
         }
 
-        // fetch earliest routeid for the train
-
-        const earliestrouteresult = await pool.query(
+        // Earliest routeid for the train
+        const earliestRouteResult = await pool.query(
             "SELECT MIN(routeid) AS minrouteid FROM routes WHERE trainid = $1;",
             [tid]
         );
-
-        const minrouteid = earliestrouteresult.rows[0]?.minrouteid;
-
-        if (!minRouteId) {
+        const minrouteid = earliestRouteResult.rows[0]?.minrouteid;
+        if (!minrouteid) {
             return res.status(404).json({ success: false, message: "No route found for this train" });
         }
 
-        // Fetch all stations in that route
+        // Stations in that route
         const routeResult = await pool.query(
             "SELECT currentstation, timefromstart FROM routes WHERE trainid = $1 AND routeid = $2 ORDER BY timefromstart;",
-            [tID, minRouteId]
+            [tid, minrouteid]
         );
+        if (routeResult.rows.length === 0) {
+            return res.status(404).json({ success: false, message: "No stations found for this train" });
+        }
 
-        // Fetch start and end stations
-        const startStation = routeResult.rows[0]?.currentstation;
-        const endStation = routeResult.rows[routeResult.rows.length - 1]?.currentstation;
+        const startStation = routeResult.rows[0].currentstation;
+        const endStation = routeResult.rows[routeResult.rows.length - 1].currentstation;
 
-        // Fetch train details
+        // Train details
         const trainResult = await pool.query(
             "SELECT * FROM trains WHERE trainid = $1;",
-            [tID]
+            [tid]
         );
         const train = trainResult.rows[0];
         if (!train) {
@@ -273,7 +269,7 @@ exports.getRoute = async (req, res) => {
         }
 
         details = {
-            trainId: tID,
+            trainId: tid,
             trainName: train.trainname,
             startStation,
             destinationStation: endStation,
@@ -282,15 +278,37 @@ exports.getRoute = async (req, res) => {
             flag: true
         };
 
+        let [h, m] = train.starttime.split(":").map(Number);
 
-    }
-    catch(err){
+        for (let stop of routeResult.rows) {
+            // Arrival time
+            let dh = (h + Math.floor(stop.timefromstart / 60)) % 24;
+            let dm = (m + stop.timefromstart % 60) % 60;
+            dh += Math.floor((m + stop.timefromstart % 60) / 60);
+            let arrivalTime = getTime(dh, dm);
+
+            // Departure time = arrival time + haltmin
+            let departureDM = (dm + haltmin) % 60;
+            let departureDH = (dh + Math.floor((dm + haltmin) / 60)) % 24;
+            let departureTime = getTime(departureDH, departureDM);
+
+            details.stations.push({
+                stationName: stop.currentstation,
+                arrivalTime,
+                departureTime
+            });
+        }
+
+        res.status(200).json(details);
+
+    } catch (err) {
         console.error(err);
-        return res.status(500).json({
+        res.status(500).json({
             success: false,
             message: "Internal server error"
         });
     }
-}
+};
+
 
 
