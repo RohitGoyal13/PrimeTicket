@@ -1,6 +1,31 @@
+
 const pool = require("../config/connect.js");
 
 const pricePerMinute = 1;
+
+const weekday = {
+    sun: 0,
+    mon: 1,
+    tue: 2,
+    wed: 3,
+    thu: 4,
+    fri: 5,
+    sat: 6,
+};
+
+
+function getNextDay(date = new Date(), day) {
+    const dateCopy = new Date(date.getTime());
+  
+    const next = new Date(
+      dateCopy.setDate(
+        dateCopy.getDate() + ((7 - dateCopy.getDay() + day) % 7 || 7),
+      ),
+    );
+  
+    return next;
+  }
+
 
 function getTime(dh, dm) {
     let time = "";
@@ -134,5 +159,138 @@ exports.searchTrains = async (req, res) => {
     }
 };
 
+exports.addTrain = async (req, res) => {
+    const { trainName, runson, totalseats, starttime, routes } = req.body;
+
+    if (!trainName || !runson || !totalseats || !starttime || !routes) {
+        return res.status(400).json({
+            success: false,
+            message: "Please fill all the fields"
+        });
+    }
+
+    const runsonLower = runson.toLowerCase();
+    if (weekday[runsonLower] === undefined || typeof weekday[runsonLower] !== 'number') {
+        return res.status(400).json({
+            success: false,
+            message: "Please enter a valid day of the week (e.g., monday, tuesday...)"
+        });
+    }
+
+    try {
+        // Get max routeId
+        const maxRouteIdResult = await pool.query(
+            "SELECT COALESCE(MAX(routeid), 0) AS max FROM routes;"
+        );
+        let routeIdCounter = maxRouteIdResult.rows[0].max;
+
+        // Insert train
+        const newTrainResult = await pool.query(
+            "INSERT INTO trains (trainname, runson, totalseats, starttime) VALUES($1, $2, $3, $4) RETURNING trainid;",
+            [trainName.toLowerCase(), runsonLower, totalseats, starttime]
+        );
+        const newTrainId = newTrainResult.rows[0].trainid;
+
+        // Get the next two service dates for the chosen day
+        const d1 = getNextDay(new Date(), weekday[runsonLower]);
+        const d2 = getNextDay(new Date(d1), weekday[runsonLower]);
+
+        const serviceDates = [d1, d2];
+
+        // Insert routes for each service date
+        for (let serviceDate of serviceDates) {
+            routeIdCounter++;
+            for (let r of routes) {
+                await pool.query(
+                    "INSERT INTO routes (trainid, currentstation, remainingseats, timefromstart, currentdate, routeid) VALUES($1, $2, $3, $4, $5, $6);",
+                    [newTrainId, r.station.toLowerCase(), totalseats, r.timeFromStart, serviceDate, routeIdCounter]
+                );
+            }
+        }
+
+        return res.status(201).json({
+            success: true,
+            message: "Train added successfully"
+        });
+
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+};
+
+
+exports.getRoute = async (req, res) => {
+    let details = {
+        flag : false,
+    };
+    const haltmin = 10;
+
+    try{
+        const {tid} = req.body;
+
+        if(!tid) {
+            return res.status(400).json({
+                success: false,
+                message: "Please fill all the fields"
+            });
+        }
+
+        // fetch earliest routeid for the train
+
+        const earliestrouteresult = await pool.query(
+            "SELECT MIN(routeid) AS minrouteid FROM routes WHERE trainid = $1;",
+            [tid]
+        );
+
+        const minrouteid = earliestrouteresult.rows[0]?.minrouteid;
+
+        if (!minRouteId) {
+            return res.status(404).json({ success: false, message: "No route found for this train" });
+        }
+
+        // Fetch all stations in that route
+        const routeResult = await pool.query(
+            "SELECT currentstation, timefromstart FROM routes WHERE trainid = $1 AND routeid = $2 ORDER BY timefromstart;",
+            [tID, minRouteId]
+        );
+
+        // Fetch start and end stations
+        const startStation = routeResult.rows[0]?.currentstation;
+        const endStation = routeResult.rows[routeResult.rows.length - 1]?.currentstation;
+
+        // Fetch train details
+        const trainResult = await pool.query(
+            "SELECT * FROM trains WHERE trainid = $1;",
+            [tID]
+        );
+        const train = trainResult.rows[0];
+        if (!train) {
+            return res.status(404).json({ success: false, message: "Train not found" });
+        }
+
+        details = {
+            trainId: tID,
+            trainName: train.trainname,
+            startStation,
+            destinationStation: endStation,
+            runsOn: train.runson,
+            stations: [],
+            flag: true
+        };
+
+
+    }
+    catch(err){
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+}
 
 
