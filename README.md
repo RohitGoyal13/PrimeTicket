@@ -54,6 +54,7 @@ The Ministry of Railways of the Government of India owns Indian Railways, a lega
 # Relation Model 
 
 ![Schema Image](images/Schema.png)
+![Relationship Model](images/Relationship.png)
 
 | Entities | Attributes |
 | --- | --- |
