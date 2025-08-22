@@ -4,6 +4,7 @@ import Results from "./pages/results.jsx"
 import Dashboard from "./pages/dashboard.jsx";
 import Login from "./pages/login.jsx";
 import Register from "./pages/register.jsx";
+import Book from "./pages/book.jsx";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/results" element={<Results />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/book" element ={<Book/>}></Route>
       </Routes>
       </Router>
     </>
