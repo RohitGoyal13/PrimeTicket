@@ -73,6 +73,23 @@
   line-height: 1.6;
 }
 
+.train-info-main{
+  display: flex;
+  flex-direction: rows;
+  justify-content: space-between;
+}
+
+.train-info-main-p{
+  text-align: right;
+}
+
+.train-info-duration{
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+}
+
 .train-card-footer {
   display: flex;
   justify-content: space-between;

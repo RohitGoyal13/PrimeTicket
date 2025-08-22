@@ -52,21 +52,22 @@ function Results() {
               </div>
 
               <div className="train-info">
-                <div>
-                  {/* Cities in Title Case */}
+                <div className="train-info-main">
                   <div>
-                  <strong>{capitalizeWords(train.departure)}</strong> ➝{" "}
-                  <strong>{capitalizeWords(train.arrival)}</strong>
+                    <div><strong>{capitalizeWords(train.departure)}, {train.departureTime} </strong></div>
+                    <p>{train.departureDate}</p>
+                  </div>
+                  <div className="train-info-duration">
+                    <div><strong>⏱{train.durationHours}h {train.durationMinutes}m</strong></div>
+                    <div><strong>Runs On: {capitalizeWords(train.runsOn)}</strong></div>
                   </div>
                   <div>
-                  
+                    <div><strong>{train.arrivalTime}, {capitalizeWords(train.arrival)}</strong></div>
+                    <p className="train-info-main-p">{train.arrivalDate}</p>
                   </div>
                 </div>
-                <p>
-                  ⏱ Departure: {train.departureTime} | Arrival:{" "}
-                  {train.arrivalTime}
-                </p>
-              </div>
+                </div>
+
 
               <div className="train-card-footer">
                 <div className="seats-container"><p className="seats-left"> Seats Left: {train.remainingSeats}</p></div>

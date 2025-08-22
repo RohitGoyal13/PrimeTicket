@@ -122,17 +122,27 @@ exports.searchTrains = async (req, res) => {
             dh += Math.floor((m + (t.departuretime % 60)) / 60);
             const departureTimeStr = getTime(dh, dm);
 
-            dh = (h + Math.floor(t.arrivaltime / 60)) % 24;
-            dm = (m + (t.arrivaltime % 60)) % 60;
-            dh += Math.floor((m + (t.arrivaltime % 60)) / 60); // FIXED
-            const arrivalTimeStr = getTime(dh, dm);
+            let arrTotalMinutes = h * 60 + m + t.arrivaltime;
+            let arrDays = Math.floor(arrTotalMinutes / (24 * 60)); // how many days passed
+            let arrMinutesInDay = arrTotalMinutes % (24 * 60);
+
+            let arrivalH = Math.floor(arrMinutesInDay / 60);
+            let arrivalM = arrMinutesInDay % 60;
+
+            let arrivalTimeStr = getTime(arrivalH, arrivalM);
+
+            // increment arrivalDate if overflow
+            let arrivalDateObj = new Date(t.arrivaldate);
+            arrivalDateObj.setDate(arrivalDateObj.getDate() + arrDays);
+            let arrivalDateStr = arrivalDateObj.toISOString().slice(0, 10);
+
 
             trainDetails.push({
                 trainid: parseInt(t.trainid),
                 departure: t.currentstation,
                 arrival: t.nextstation,
                 departureDate: t.departuredate,
-                arrivalDate: t.arrivaldate,
+                arrivalDate: arrivalDateStr,
                 durationHours: Math.floor(t.duration / 60),
                 durationMinutes: t.duration % 60,
                 price: t.duration * pricePerMinute,
@@ -282,10 +292,16 @@ exports.getRoute = async (req, res) => {
 
         for (let stop of routeResult.rows) {
             // Arrival time
-            let dh = (h + Math.floor(stop.timefromstart / 60)) % 24;
-            let dm = (m + stop.timefromstart % 60) % 60;
-            dh += Math.floor((m + stop.timefromstart % 60) / 60);
-            let arrivalTime = getTime(dh, dm);
+            let totalMinutes = h * 60 + m + stop.timefromstart;
+            let daysPassed = Math.floor(totalMinutes / (24 * 60));
+            let minutesInDay = totalMinutes % (24 * 60);
+
+            let ah = Math.floor(minutesInDay / 60);
+            let am = minutesInDay % 60;
+
+            let arrivalTime = getTime(ah, am);
+            // if you want: you can also increment date by daysPassed like above
+
 
             // Departure time = arrival time + haltmin
             let departureDM = (dm + haltmin) % 60;
