@@ -34,7 +34,7 @@ function Dashboard() {
   const [current, setCurrent] = useState(0);
 
   // search state
-  const [from, setFrom] = useState({ name: "New Delhi" });
+  const [from, setFrom] = useState({ name: "Delhi" });
   const [to, setTo] = useState({ name: "Nagpur" });
   const [date, setDate] = useState(getToday());
 
@@ -92,6 +92,8 @@ function Dashboard() {
 
       const res = await axios.post(`${API_BASE}/api/trains/search`, payload);
 
+    console.table(JSON.parse(JSON.stringify(res.data.data)));
+
        console.log("✅ Full API response:", res.data);
 
     // If train list is in res.data.data
@@ -100,6 +102,8 @@ function Dashboard() {
     } else {
       console.log("⚠️ No train list found in response");
     }
+
+      
 
       localStorage.setItem("trainResults", JSON.stringify(res.data?.data || []));
 
@@ -117,7 +121,7 @@ function Dashboard() {
     <div className="page">
       {/* Navbar */}
       <header className="navbar">
-        <h2 className="logo"><img src="images/applogo.png" alt="" className="applogo" /></h2>
+       <div className="logo"> <h2 ><img src="images/applogo.png" alt="" className="applogo" /></h2></div>
         <nav>
           <a href="#">Flights</a>
           <a href="#">Hotels</a>

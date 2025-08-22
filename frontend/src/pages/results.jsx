@@ -36,7 +36,7 @@ function Results() {
       </header>
 
       <section className="results-header">
-        <h1></h1>
+        <h1>Available Trains</h1>
       </section>
 
       <div className="results-container">
@@ -48,24 +48,29 @@ function Results() {
               <div className="train-card-header">
                 {/* Train name in Title Case */}
                 <h2>{capitalizeWords(train.trainName)}</h2>
-                <span className="train-id">#{train.trainid}</span>
+                <span className="train-id">Train ID: {train.trainid}</span>
               </div>
 
               <div className="train-info">
-                <p>
+                <div>
                   {/* Cities in Title Case */}
+                  <div>
                   <strong>{capitalizeWords(train.departure)}</strong> ➝{" "}
                   <strong>{capitalizeWords(train.arrival)}</strong>
-                </p>
+                  </div>
+                  <div>
+                  
+                  </div>
+                </div>
                 <p>
                   ⏱ Departure: {train.departureTime} | Arrival:{" "}
                   {train.arrivalTime}
                 </p>
-                <p>🪑 Seats Left: {train.remainingSeats}</p>
               </div>
 
               <div className="train-card-footer">
-                <button className="book-btn">Book</button>
+                <div className="seats-container"><p className="seats-left"> Seats Left: {train.remainingSeats}</p></div>
+                <button className="book-btn">Book Ticket</button>
               </div>
             </div>
           ))

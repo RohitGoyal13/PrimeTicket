@@ -1,6 +1,6 @@
 .results-page {
   min-height: 100vh;
-  background: #eceeea;
+  background-image: url("/images/loginbackground.jpg");
   font-family: Arial, sans-serif;
 }
 
@@ -11,31 +11,39 @@
 
 .results-header h1 {
   font-size: 2rem;
-  color: #2d3748;
+  color: tomato;
 }
 
 .results-container {
-  display: grid;
-  align-items: center;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 20px;
+  display: flex;
+  flex-direction: column;  /* stack items vertically */
+  align-items: center;  
+  justify-content: center;   /* center them horizontally */
+    /* control how wide the stack can be */
+  width: 100%;              /* responsive width */
+  margin: 20px 20px;
 }
+
 
 .train-card {
   background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0px 4px 10px rgba(0,0,0,0.08);
+  border-radius: 14px;
+  padding: 30px;  /* bigger padding for wider look */
+  box-shadow: 0px 6px 15px rgba(0,0,0,0.1);
   display: flex;
+  width: 50%;
+  height: 250px;
   flex-direction: column;
+  margin-bottom: 25px;
   justify-content: space-between;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .train-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0px 6px 14px rgba(0,0,0,0.12);
+  transform: translateY(-6px);
+  box-shadow: 0px 10px 20px rgba(0,0,0,0.15);
 }
+
 
 .train-card-header {
   display: flex;
@@ -44,37 +52,60 @@
 }
 
 .train-card-header h2 {
-  font-size: 1.2rem;
+  font-size: 1.7rem;
   color: #2c5282;
   margin: 0;
 }
 
+.seats-left{
+  color: rgb(231, 41, 117);
+  font-weight: bold;
+}
+
 .train-id {
-  font-size: 0.9rem;
+  font-size: 1.2rem;
   color: #718096;
 }
 
 .train-info {
-  margin-top: 15px;
-  font-size: 0.95rem;
+  font-size: 1.2rem;
   color: #4a5568;
   line-height: 1.6;
 }
 
 .train-card-footer {
-  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   text-align: right;
+}
+
+.seats-container{
+  height: 100%;
+  background-color: #96e48b;
+  border: 1px solid #000000;
+  display: flex;
+  padding: 15px;
+  border-radius: 8px;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.seats-container :hover{
+  cursor: pointer;
 }
 
 .book-btn {
   background: #3182ce;
   color: white;
   border: none;
-  padding: 10px 18px;
+  padding: 15px;
   border-radius: 8px;
   font-size: 0.95rem;
   cursor: pointer;
   transition: background 0.2s ease;
+  font-weight: bold;
 }
 
 .book-btn:hover {
@@ -87,3 +118,5 @@
   font-size: 1.2rem;
   color: #e53e3e;
 }
+
+
