@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import {useNavigate} from "react-router-dom";
 import "../styles/results.css";
 import "../styles/dashboard.css";
 
 function Results() {
   const [trains, setTrains] = useState([]);
+  const [showOverlay,setShowOverlay] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const stored = localStorage.getItem("trainResults");
@@ -13,14 +16,23 @@ function Results() {
     }
   }, []);
 
-  const capitalizeWords = (str) =>
+  const capitalizeWords = (str) => 
   str
     .toLowerCase()
     .split(/[\s-]/)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ")
     .replace(/\s-\s?/g, "-"); // keep hyphen formatting
+  
 
+  const handlebook = (train) => {
+    const token = localStorage.getItem("token");
+    if(token){
+      navigate("/book" , {state : {train}});
+    } else{
+      setShowOverlay(true);
+    }
+  }
 
   return (
     <div className="results-page">
@@ -71,12 +83,64 @@ function Results() {
 
               <div className="train-card-footer">
                 <div className="seats-container"><p className="seats-left"> Seats Left: {train.remainingSeats}</p></div>
-                <button className="book-btn">Book Ticket</button>
+                <button className="book-btn" onClick={ () => handlebook(train)}>Book Ticket</button>
               </div>
             </div>
           ))
         )}
       </div>
+
+      {showOverlay && (
+        <div className="auth-overlay">
+          <div className="auth-card">
+            <div className="auth-card-header">
+            <h2>Login or Signup Required</h2>
+             <button
+              className="close-btn"
+              onClick={() => setShowOverlay(false)}
+            >
+              ✖
+            </button>
+            </div>
+            <div>
+             <div class= "auth-card-middle">
+             <img src= "/images/overlay.svg"></img>
+              <p>
+              Quick booking with personalized recommendations
+              </p>
+              </div>
+               <div class= "auth-card-middle">
+             <img src= "/images/overlay.svg"></img>
+              <p>
+              Free Cancellations. Customer support
+              </p>
+              </div>
+               <div class= "auth-card-middle">
+             <img src= "/images/overlay.svg"></img>
+              <p>
+              Access saved passengers
+              </p>
+              </div>
+               <div class= "auth-card-middle">
+             <img src= "/images/overlay.svg"></img>
+              <p>
+              Get confirmed ticket on waitlisted trains
+              </p>
+              </div>
+               <div class= "auth-card-middle">
+             <img src= "/images/overlay.svg"></img>
+              <p>
+              Fast-tatkal booking with one-click
+              </p>
+              </div>
+            </div>
+            <div className="auth-buttons">
+              <button onClick={() => navigate("/login")}>Login</button>
+              <button onClick={() => navigate("/register")}>Signup</button>
+            </div>
+            </div>
+          </div>
+      )}
     </div>
   );
 }
