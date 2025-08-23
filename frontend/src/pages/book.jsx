@@ -2,9 +2,12 @@ import react from "react";
 
 
 const Book = () => {
+
+    return(
     <div>
-        hi
+        <p>hi</p>
     </div>
+    )
 }
 
 export default Book;

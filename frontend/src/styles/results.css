@@ -203,11 +203,15 @@
 .auth-buttons button:first-child {
   background: #007bff;
   color: white;
+  font-size: 20px;
+  font-weight: bolder;
 }
 
 .auth-buttons button:last-child {
   background: #28a745;
   color: white;
+  font-size: 20px;
+  font-weight: bolder;
 }
 
 

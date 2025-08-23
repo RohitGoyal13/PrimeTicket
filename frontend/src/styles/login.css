@@ -110,3 +110,49 @@
     }
   }
 }
+
+/* Overlay full screen */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+/* Overlay card */
+.overlay-card {
+  background: #fff;
+  padding: 2rem 3rem;
+  border-radius: 12px;
+  text-align: center;
+  animation: popUp 0.3s ease-in-out;
+  box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.25);
+}
+
+.overlay-card h2 {
+  margin-bottom: 10px;
+  color: green;
+}
+
+.overlay-card p {
+  color: #333;
+  font-size: 16px;
+}
+
+/* Animation for popup */
+@keyframes popUp {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

@@ -1,6 +1,58 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/login.css";
 
 const Login = () => {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: ""
+  });
+
+  const [overlay, setOverlay] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const res = await fetch("http://localhost:5050/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        setError(data.message || "Login failed");
+        return;
+      }
+
+      // ✅ Save JWT token to localStorage (optional but recommended)
+      localStorage.setItem("token", data.token);
+
+      // ✅ Show success overlay
+      setOverlay(true);
+
+      // Redirect after 2 sec
+      setTimeout(() => {
+        navigate("/book");
+      }, 2000);
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+    }
+  };
+
   return (
     <div className="login">
       <div className="card">
@@ -13,25 +65,47 @@ const Login = () => {
           </p>
           <span>
             Don't have an account?{" "}
-            <a href="/register" style={{ color: "rgb(71, 255, 86)", fontWeight: "bold" }}>
-                Signup
+            <a
+              href="/register"
+              style={{ color: "rgb(71, 255, 86)", fontWeight: "bold" }}
+            >
+              Signup
             </a>
-            </span>
-
-
-          {/* <Link to="/register">
-            <button>Create Account</button>
-          </Link> */}
+          </span>
         </div>
+
         <div className="right">
           <h1>Login</h1>
-          <form>
-            <input type="text" placeholder="Enter Your Email" name="email" />
-            <input type="password" placeholder="Enter Your Password" name="password" />
-            <button>Login</button>   {/* ✅ Updated */}
+          <form onSubmit={handleSubmit}>
+            <input
+              type="email"
+              placeholder="Enter Your Email"
+              name="email"
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="password"
+              placeholder="Enter Your Password"
+              name="password"
+              onChange={handleChange}
+              required
+            />
+            {error && <p className="error">{error}</p>}
+            <button type="submit">Login</button>
           </form>
         </div>
       </div>
+
+      {/* ✅ Overlay */}
+      {overlay && (
+        <div className="overlay">
+          <div className="overlay-card">
+            <h2>✅ Login Successful!</h2>
+            <p>Redirecting you to booking...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
