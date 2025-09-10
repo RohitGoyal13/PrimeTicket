@@ -13,7 +13,9 @@ const bookingRoutes = require("./routes/bookingRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 
 
-const allowed = ["https://prime-ticket.vercel.app"];
+const allowed = ["https://prime-ticket.vercel.app",
+                 "http://localhost:5173"
+                ];
 app.use(cors({
   origin: (origin, cb) => cb(null, !origin || allowed.includes(origin))
 }));
