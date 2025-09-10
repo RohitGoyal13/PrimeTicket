@@ -1,3 +1,4 @@
+require("dotenv").config();
 const pool = require("./config/connect");
 const express = require("express");
 const app = express();
@@ -6,13 +7,17 @@ const {response} = require("express");
 const schedule = require("node-schedule");
 const authRoutes = require("./routes/authRoutes");
 const {protectAdmin} = require("./middleware/adminMiddleware");
- const adminRoutes = require("./routes/adminRoutes");
- const trainRoutes = require("./routes/trainRoutes");
- const bookingRoutes = require("./routes/bookingRoutes");
- const paymentRoutes = require("./routes/paymentRoutes");
+const adminRoutes = require("./routes/adminRoutes");
+const trainRoutes = require("./routes/trainRoutes");
+const bookingRoutes = require("./routes/bookingRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 
-app.use(cors());
+const allowed = ["https://prime-ticket.vercel.app"];
+app.use(cors({
+  origin: (origin, cb) => cb(null, !origin || allowed.includes(origin))
+}));
+
 app.use(express.json());
 
 // login routes
