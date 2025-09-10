@@ -28,7 +28,10 @@ function Results() {
   const handlebook = (train) => {
     const token = localStorage.getItem("token");
     if(token){
-      navigate("/book" , {state : {train}});
+      navigate("/book" , {state : {
+        train,
+         price: train.price
+      }});
     } else{
       setShowOverlay(true);
     }
