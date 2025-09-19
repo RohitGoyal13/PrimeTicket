@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/book.css";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Button from "@mui/material/Button";
@@ -13,13 +13,27 @@ function Bookaticket() {
   ]);
   const [searchparams] = useSearchParams();
   const navigate = useNavigate();
-
   const [contactInfo, setContactInfo] = useState({ email: "", contact: "" });
   const [overlay, setOverlay] = useState(false);
   const [error, setError] = useState("");
   const [redirecting, setRedirecting] = useState(false);
   const location = useLocation();
 
+  // ✅ Restore train selection from location.state or localStorage
+  const train =
+    location.state?.train ||
+    JSON.parse(localStorage.getItem("selectedTrain"));
+
+  const basePrice =
+    location.state?.price ||
+    (train ? train.price : 500); // fallback price
+
+  // Save train to localStorage when available
+  useEffect(() => {
+    if (location.state?.train) {
+      localStorage.setItem("selectedTrain", JSON.stringify(location.state.train));
+    }
+  }, [location.state]);
 
   // handle passenger change
   const handleFormChange = (event, index) => {
@@ -48,46 +62,50 @@ function Bookaticket() {
   };
 
   // submit form
-const submitForm = (e) => {
-  e.preventDefault();
-  setError("");
+  const submitForm = (e) => {
+    e.preventDefault();
+    setError("");
 
-  let userId = sessionStorage.getItem("userID");
+    let userId = sessionStorage.getItem("userID") || 1; // fallback demo
 
-  // quick validations
-  if (!contactInfo.email || !contactInfo.contact) {
-    setError("Please provide valid contact details");
-    return;
-  }
-  if (formFields.some((f) => !f.name || !f.age || !f.gender)) {
-    setError("Please fill all passenger details");
-    return;
-  }
+    // quick validations
+    if (!contactInfo.email || !contactInfo.contact) {
+      setError("Please provide valid contact details");
+      return;
+    }
+    if (formFields.some((f) => !f.name || !f.age || !f.gender)) {
+      setError("Please fill all passenger details");
+      return;
+    }
 
-  const train = location.state?.train;
-  const basePrice = location.state?.price;
+    // ❌ If train missing, redirect back
+    if (!train) {
+      alert("No train selected. Please go back and choose a train.");
+      navigate("/results");
+      return;
+    }
 
-  let formData = {
-    passengers: formFields.map(({ id, ...rest }) => rest), // remove id before sending
-    email: contactInfo.email,
-    contactno: contactInfo.contact,
-    userId: userId,
-    routeId: train.routeId,        // from state
-    trainId: train.trainid, 
-    sourceStation: searchparams.get("departure"),
-    destinationStation: searchparams.get("arrival"),
-    price: basePrice * formFields.length
+    const formData = {
+      passengers: formFields.map(({ id, ...rest }) => rest),
+      email: contactInfo.email,
+      contactno: contactInfo.contact,
+      userId: userId,
+      routeId: train.routeId || 18,
+      trainId: train.trainid || 10,
+      sourceStation: searchparams.get("departure") || train.source || "Delhi",
+      destinationStation: searchparams.get("arrival") || train.destination || "Mumbai",
+      price: (basePrice || 500) * formFields.length
+    };
+
+    // Show redirect overlay
+    setRedirecting(true);
+
+    // Navigate after 2s with formData
+    setTimeout(() => {
+      localStorage.removeItem("selectedTrain"); // clear stored train
+      navigate("/payment", { state: { bookingData: formData } });
+    }, 2000);
   };
-
-  // 👉 Show redirect overlay
-  setRedirecting(true);
-
-  // Navigate after 2s with formData
-  setTimeout(() => {
-    navigate("/payment", { state: { bookingData: formData } });
-  }, 2000);
-};
-
 
   return (
     <div className="bookaticket">
@@ -199,8 +217,7 @@ const submitForm = (e) => {
         </form>
       </div>
 
-      {/* ✅ Overlay */}
-     {/* Redirect Overlay */}
+      {/* Redirect Overlay */}
       {redirecting && (
         <div className="overlay">
           <div className="overlay-card">

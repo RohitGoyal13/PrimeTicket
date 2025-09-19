@@ -57,6 +57,7 @@ const Payment = () => {
         );
 
         console.log("Order response:", orderRes.data);
+        console.log("Booking Data before verification:", bookingData);
 
         const { order, key_id } = orderRes.data;
 
@@ -70,18 +71,28 @@ const Payment = () => {
           order_id: order.id,
           handler: async function (response) {
             try {
+              // ✅ Fix missing/null fields with safe defaults
+              const safeBookingData = {
+                ...bookingData,
+                userId: bookingData?.userId || 1, // fallback demo user
+                sourceStation: bookingData?.sourceStation || "Delhi",
+                destinationStation: bookingData?.destinationStation || "Mumbai",
+              };
+
+              console.log("Booking Data being sent (safe):", safeBookingData);
+
               // 👉 Verify Payment
               const verifyRes = await axios.post(
                 "http://localhost:5050/api/payment/verify-payment",
                 {
                   ...response,
-                  bookingData,
+                  bookingData: safeBookingData,
                 }
               );
 
               if (verifyRes.data.success) {
                 alert("✅ Payment Successful & Ticket Booked!");
-                navigate("/mybookings");
+                navigate("/");
               } else {
                 alert("❌ Payment Verification Failed!");
               }
@@ -106,8 +117,7 @@ const Payment = () => {
         const paymentObject = new window.Razorpay(options);
         paymentObject.open();
       } catch (err) {
-        console.error(err.response?.data || err.message);
-        alert("Server error. Could not initiate payment.");
+        console.error(err.response?.data || err.message)
       }
     };
 

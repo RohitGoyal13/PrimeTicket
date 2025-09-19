@@ -6,6 +6,7 @@ import Login from "./pages/login.jsx";
 import Register from "./pages/register.jsx";
 import Book from "./pages/book.jsx";
 import Payment from "./pages/payment.jsx";
+import MyBookings from "./pages/mybookings.jsx";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/book" element ={<Book/>}></Route>
         <Route path="/payment" element={<Payment/>}></Route>
+        <Route path="/mybookings" element={<MyBookings/>}></Route>
       </Routes>
       </Router>
     </>

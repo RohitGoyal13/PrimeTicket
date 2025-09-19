@@ -2,6 +2,9 @@ const express = require("express");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 
+// import your booking controller
+const bookingsController = require("../controllers/bookingController");
+
 const router = express.Router();
 
 // init razorpay instance
@@ -45,7 +48,7 @@ router.post("/verify-payment", async (req, res) => {
       razorpay_payment_id,
       razorpay_order_id,
       razorpay_signature,
-      bookingData,
+      bookingData, // 👈 frontend must send this with userId, routeId, trainId, etc.
     } = req.body;
 
     if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
@@ -61,14 +64,27 @@ router.post("/verify-payment", async (req, res) => {
       .update(body.toString())
       .digest("hex");
 
-    if (expectedSignature === razorpay_signature) {
-      return res.json({
-        success: true,
-        message: "Payment verified & booking created",
-      });
-    } else {
+    if (expectedSignature !== razorpay_signature) {
       return res.status(400).json({ success: false, error: "Invalid signature" });
     }
+
+            // ✅ Signature verified → Create booking directly
+        let bookingResult;
+        try {
+        bookingResult = await bookingsController.createTicket(bookingData);
+        } catch (err) {
+        return res.status(400).json({
+            success: false,
+            error: err.message || "Booking failed",
+        });
+        }
+
+
+    return res.json({
+      success: true,
+      message: "Payment verified & booking created",
+      booking: bookingResult,
+    });
   } catch (err) {
     console.error("verify-payment error:", err);
     res.status(500).json({ success: false, error: "Verification failed" });

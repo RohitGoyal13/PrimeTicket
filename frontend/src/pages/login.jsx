@@ -46,7 +46,7 @@ const Login = () => {
 
       // Redirect after 2 sec
       setTimeout(() => {
-        navigate("/book");
+        navigate("/results");
       }, 2000);
     } catch (err) {
       setError("Something went wrong. Please try again.");
