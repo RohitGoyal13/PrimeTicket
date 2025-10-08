@@ -19,6 +19,8 @@ async function createTicket({
   email,
   contactno,
   passengers,
+  paymentId,
+  orderId,
 }) {
   if (
     !userId ||
@@ -38,8 +40,8 @@ async function createTicket({
 
   // Insert ticket
   const newTicket = await pool.query(
-    `INSERT INTO Tickets (UserID, RouteID, TrainID, SourceStation, DestinationStation, Price, Email, ContactNo, NoOfPassenger)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    `INSERT INTO Tickets (UserID, RouteID, TrainID, SourceStation, DestinationStation, Price, Email, ContactNo, NoOfPassenger,PaymentId, RazorpayOrderId)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
      RETURNING TicketId;`,
     [
       userId,
@@ -51,6 +53,8 @@ async function createTicket({
       email,
       contactno,
       passengers.length,
+      paymentId || null,
+      orderId || null
     ]
   );
 
@@ -342,3 +346,9 @@ exports.deleteTicket = async (req, res) => {
 };
 
 exports.createTicket = createTicket;
+
+// exports.createTicket = createTicket({
+//    ...bookingData,
+//    paymentId: razorpay_payment_id,
+//    orderId: razorpay_order_id
+// });

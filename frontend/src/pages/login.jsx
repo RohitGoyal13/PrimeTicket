@@ -39,7 +39,10 @@ const Login = () => {
       }
 
       // ✅ Save JWT token to localStorage (optional but recommended)
-      localStorage.setItem("token", data.token);
+      sessionStorage.setItem("token", data.token);
+      sessionStorage.setItem("userID", data.userid);
+
+      console.log(`Userid : ${data.userid}`);
 
       // ✅ Show success overlay
       setOverlay(true);

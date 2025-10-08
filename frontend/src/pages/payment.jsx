@@ -92,7 +92,7 @@ const Payment = () => {
 
               if (verifyRes.data.success) {
                 alert("✅ Payment Successful & Ticket Booked!");
-                navigate("/");
+                navigate("/mybookings");
               } else {
                 alert("❌ Payment Verification Failed!");
               }

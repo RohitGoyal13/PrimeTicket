@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from "react";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useSearchParams} from "react-router-dom";
 import "../styles/results.css";
 import "../styles/dashboard.css";
 
 function Results() {
   const [trains, setTrains] = useState([]);
   const [showOverlay,setShowOverlay] = useState(false);
+  const [searchparams] = useSearchParams();
   const navigate = useNavigate();
+
+
+  const from = searchparams.get("from");
+  const to = searchparams.get("to");
+  const date = searchparams.get("date");
+
+  console.log("From:", from, "To:", to, "Date:", date);
+
 
   useEffect(() => {
     const stored = localStorage.getItem("trainResults");
@@ -26,9 +35,9 @@ function Results() {
   
 
   const handlebook = (train) => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if(token){
-      navigate("/book" , {state : {
+      navigate(`/book?from=${from}&to=${to}`, {state : {
         train,
          price: train.price
       }});
@@ -51,7 +60,7 @@ function Results() {
       </header>
 
       <section className="results-header">
-        <h1>Available Trains</h1>
+        <h1>Available Trains From {from} to {to} </h1>
       </section>
 
       <div className="results-container">

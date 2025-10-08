@@ -13,7 +13,7 @@ function MyBookings() {
     const fetchBookings = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5050/api/bookings/user/${userId}?`
+          `http://localhost:5050/api/booking/user/${userId}?`
         );
         setBookings(res.data);
       } catch (err) {

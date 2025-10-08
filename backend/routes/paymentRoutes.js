@@ -70,15 +70,16 @@ router.post("/verify-payment", async (req, res) => {
 
             // ✅ Signature verified → Create booking directly
         let bookingResult;
-        try {
-        bookingResult = await bookingsController.createTicket(bookingData);
-        } catch (err) {
-        return res.status(400).json({
-            success: false,
-            error: err.message || "Booking failed",
+       try {
+        bookingResult = await bookingsController.createTicket({
+          ...bookingData,
+          paymentId: razorpay_payment_id,
+          orderId: razorpay_order_id,
         });
-        }
-
+      } catch (err) {
+        console.error("Booking creation failed after payment:", err);
+        return res.status(500).json({ success: false, error: "Payment success but booking failed" });
+      }
 
     return res.json({
       success: true,

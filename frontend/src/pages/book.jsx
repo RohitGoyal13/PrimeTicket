@@ -92,8 +92,8 @@ function Bookaticket() {
       userId: userId,
       routeId: train.routeId || 18,
       trainId: train.trainid || 10,
-      sourceStation: searchparams.get("departure") || train.source || "Delhi",
-      destinationStation: searchparams.get("arrival") || train.destination || "Mumbai",
+      sourceStation: searchparams.get("from") || train.source || "D",
+      destinationStation: searchparams.get("to") || train.destination || "M",
       price: (basePrice || 500) * formFields.length
     };
 
