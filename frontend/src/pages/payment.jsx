@@ -8,6 +8,8 @@ const Payment = () => {
   const navigate = useNavigate();
   const bookingData = location.state?.bookingData;
 
+  console.log(bookingData);
+
   useEffect(() => {
     if (!bookingData) {
       alert("No booking data found, redirecting...");
@@ -91,7 +93,8 @@ const Payment = () => {
               );
 
               if (verifyRes.data.success) {
-                alert("✅ Payment Successful & Ticket Booked!");
+                localStorage.removeItem("selectedTrain");
+                localStorage.removeItem("trainResults");
                 navigate("/mybookings");
               } else {
                 alert("❌ Payment Verification Failed!");

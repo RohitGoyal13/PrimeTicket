@@ -20,9 +20,9 @@ function Bookaticket() {
   const location = useLocation();
 
   // ✅ Restore train selection from location.state or localStorage
-  const train =
-    location.state?.train ||
-    JSON.parse(localStorage.getItem("selectedTrain"));
+  const {train, price,from,to} = 
+    location.state ||
+    JSON.parse(localStorage.getItem("selectedTrain")) || {};
 
   const basePrice =
     location.state?.price ||
@@ -30,10 +30,14 @@ function Bookaticket() {
 
   // Save train to localStorage when available
   useEffect(() => {
-    if (location.state?.train) {
-      localStorage.setItem("selectedTrain", JSON.stringify(location.state.train));
-    }
-  }, [location.state]);
+  if (location.state) {
+    const { train, from, to, price } = location.state;
+    localStorage.setItem(
+      "selectedTrain",
+      JSON.stringify({ train, from, to, price })
+    );
+  }
+    }, [location.state]);
 
   // handle passenger change
   const handleFormChange = (event, index) => {
@@ -85,27 +89,27 @@ function Bookaticket() {
       return;
     }
 
-    const formData = {
+        const formData = {
       passengers: formFields.map(({ id, ...rest }) => rest),
       email: contactInfo.email,
       contactno: contactInfo.contact,
       userId: userId,
       routeId: train.routeId || 18,
       trainId: train.trainid || 10,
-      sourceStation: searchparams.get("from") || train.source || "D",
-      destinationStation: searchparams.get("to") || train.destination || "M",
-      price: (basePrice || 500) * formFields.length
+      sourceStation: from || train?.departure || "Unknown",
+      destinationStation: to || train?.arrival || "Unknown",
+      price: (price || basePrice || 500) * formFields.length,
     };
 
-    // Show redirect overlay
+    console.log("Form Data:", formData);
+
     setRedirecting(true);
 
-    // Navigate after 2s with formData
     setTimeout(() => {
-      localStorage.removeItem("selectedTrain"); // clear stored train
       navigate("/payment", { state: { bookingData: formData } });
     }, 2000);
   };
+
 
   return (
     <div className="bookaticket">

@@ -3,8 +3,11 @@ import "../styles/dashboard.css";
 import { FaTrain } from "react-icons/fa";
 import { MdSwapHoriz } from "react-icons/md";
 import { FaRegCalendarAlt } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 import axios from "axios";
+
+
 
 const images = [
   "images/train1.jpg",
@@ -32,6 +35,7 @@ function getToday() {
 
 function Dashboard() {
   const [current, setCurrent] = useState(0);
+  const navigate = useNavigate();
 
   // search state
   const [from, setFrom] = useState({ name: "Delhi" });
@@ -108,7 +112,14 @@ function Dashboard() {
       localStorage.setItem("trainResults", JSON.stringify(res.data?.data || []));
 
       setTimeout(() => {
-        window.location.href = `/results?from=${from.name}&to=${to.name}&date=${date}`;  
+        navigate("/results", {
+      state: {
+    from: from.name,
+    to: to.name,
+    date,
+    results: res.data?.data || [],
+  },
+});  
       }, );
     } 
     catch (err) {

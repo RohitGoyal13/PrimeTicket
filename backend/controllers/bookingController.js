@@ -148,8 +148,8 @@ exports.searchTicket = async (req, res) => {
             to_char(DEPARTURE.CurrentDate, 'YYYY-MM-DD') AS DepartureDate, 
             to_char(ARRIVAL.CurrentDate, 'YYYY-MM-DD') AS ArrivalDate, 
             ARRIVAL.TimeFromStart - DEPARTURE.TimeFromStart AS Duration, 
-            ARRIVAL.TimeFromStart AS ArrivalTime, 
-            DEPARTURE.TimeFromStart AS DepartureTime
+            ARRIVAL.TimeFromStart AS arrivaltime, 
+            DEPARTURE.TimeFromStart AS departuretime
          FROM Routes AS DEPARTURE
          INNER JOIN Routes AS ARRIVAL
          ON (DEPARTURE.RouteID = ARRIVAL.RouteID AND DEPARTURE.TrainID = ARRIVAL.TrainID)
@@ -171,6 +171,11 @@ exports.searchTicket = async (req, res) => {
       dm = (m + stationDetails.arrivaltime % 60) % 60;
       let arrivalTime = getTime(dh, dm);
 
+      const passengersResult = await pool.query(
+      `SELECT name, age, gender FROM Passengers WHERE TicketID = $1;`,
+      [ticket.ticketid]
+            );
+
       bookings.push({
         trainName: train.trainname,
         trainId: ticket.trainid,
@@ -185,6 +190,10 @@ exports.searchTicket = async (req, res) => {
         arrivalTime,
         arrivalDate: stationDetails.arrivaldate,
         ticketId: ticket.ticketid,
+        email: ticket.email,
+        contactno: ticket.contactno,
+        passengers: passengersResult.rows,
+        price: ticket.price,
       });
     }
 
@@ -201,93 +210,6 @@ exports.searchTicket = async (req, res) => {
   }
 };
 
-
-exports.searchTicket = async (req, res) => {
-    const { uid } = req.body;
-
-    if (!uid) {
-        return res.status(400).json({
-            success: false,
-            message: "Please provide user ID"
-        });
-    }
-
-    try {
-        const ticketResult = await pool.query(
-            `SELECT * FROM Tickets WHERE UserID = $1;`, [uid]
-        );
-
-        let bookings = [];
-
-        for (let ticket of ticketResult.rows) {
-            // Train details
-            let trainResult = await pool.query(
-                "SELECT TrainName, RunsOn, StartTime FROM Trains WHERE TrainID = $1",
-                [ticket.trainid]
-            );
-            let train = trainResult.rows[0];
-
-            // Route details
-            let stationDetailsResult = await pool.query(
-                `SELECT 
-                    to_char(DEPARTURE.CurrentDate, 'YYYY-MM-DD') AS DepartureDate, 
-                    to_char(ARRIVAL.CurrentDate, 'YYYY-MM-DD') AS ArrivalDate, 
-                    ARRIVAL.TimeFromStart - DEPARTURE.TimeFromStart AS Duration, 
-                    ARRIVAL.TimeFromStart AS ArrivalTime, 
-                    DEPARTURE.TimeFromStart AS DepartureTime
-                 FROM Routes AS DEPARTURE
-                 INNER JOIN Routes AS ARRIVAL
-                 ON (DEPARTURE.RouteID = ARRIVAL.RouteID AND DEPARTURE.TrainID = ARRIVAL.TrainID)
-                 WHERE DEPARTURE.CurrentStation = $1 
-                   AND ARRIVAL.CurrentStation = $2 
-                   AND ARRIVAL.RouteID = $3`,
-                [ticket.sourcestation, ticket.destinationstation, ticket.routeid]
-            );
-            let stationDetails = stationDetailsResult.rows[0];
-
-            // Base train start time
-            let [h, m] = train.starttime.split(':').map(Number);
-
-            // Departure time
-            let dh = (h + Math.floor(stationDetails.departuretime / 60)) % 24;
-            let dm = (m + stationDetails.departuretime % 60) % 60;
-            dh += Math.floor((m + stationDetails.departuretime % 60) / 60);
-            let departureTime = getTime(dh, dm);
-
-            // Arrival time
-            dh = (h + Math.floor(stationDetails.arrivaltime / 60)) % 24;
-            dm = (m + stationDetails.arrivaltime % 60) % 60;
-            let arrivalTime = getTime(dh, dm);
-
-            bookings.push({
-                trainName: train.trainname,
-                trainId: ticket.trainid,
-                noOfPassengers: ticket.noofpassenger,
-                departureStation: ticket.sourcestation,
-                departureTime,
-                departureDate: stationDetails.departuredate,
-                durationHours: Math.floor(stationDetails.duration / 60),
-                durationMinutes: stationDetails.duration % 60,
-                runsOn: train.runson,
-                arrivalStation: ticket.destinationstation,
-                arrivalTime,
-                arrivalDate: stationDetails.arrivaldate,
-                ticketId: ticket.ticketid
-            });
-        }
-
-        return res.status(200).json({
-            success: true,
-            bookings
-        });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error"
-        });
-    }
-};
 
 exports.allTickets = async (req, res) => {
     try {

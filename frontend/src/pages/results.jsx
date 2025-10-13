@@ -1,3 +1,4 @@
+import { useLocation } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import "../styles/results.css";
@@ -6,24 +7,26 @@ import "../styles/dashboard.css";
 function Results() {
   const [trains, setTrains] = useState([]);
   const [showOverlay,setShowOverlay] = useState(false);
-  const [searchparams] = useSearchParams();
+  
   const navigate = useNavigate();
 
 
-  const from = searchparams.get("from");
-  const to = searchparams.get("to");
-  const date = searchparams.get("date");
+  const location = useLocation();
+  const { from, to, date, results } = location.state || {};
+
 
   console.log("From:", from, "To:", to, "Date:", date);
 
 
   useEffect(() => {
+  if (results) {
+    setTrains(results);
+  } else {
     const stored = localStorage.getItem("trainResults");
-    if (stored) {
-      setTrains(JSON.parse(stored));
-      console.log("Loaded trains:", JSON.parse(stored));
-    }
-  }, []);
+    if (stored) setTrains(JSON.parse(stored));
+  }
+}, [results]);
+
 
   const capitalizeWords = (str) => 
   str
@@ -37,10 +40,13 @@ function Results() {
   const handlebook = (train) => {
     const token = sessionStorage.getItem("token");
     if(token){
-      navigate(`/book?from=${from}&to=${to}`, {state : {
+      navigate("/book", {state : {
         train,
-         price: train.price
-      }});
+         price: train.price,
+         from,
+         to,
+      },
+    });
     } else{
       setShowOverlay(true);
     }
@@ -60,7 +66,7 @@ function Results() {
       </header>
 
       <section className="results-header">
-        <h1>Available Trains From {from} to {to} </h1>
+        <h1>Available Trains</h1>
       </section>
 
       <div className="results-container">
