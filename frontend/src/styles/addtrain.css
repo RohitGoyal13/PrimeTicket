@@ -1,0 +1,113 @@
+.add-train-container {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 25px 35px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.add-train-container h2 {
+  text-align: center;
+  color: #1d3557;
+  margin-bottom: 25px;
+  letter-spacing: 0.5px;
+}
+
+.train-form .form-group {
+  margin-bottom: 18px;
+}
+
+.train-form label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.train-form input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.train-form input:focus {
+  border-color: #007bff;
+}
+
+.route-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.route-row input {
+  flex: 1;
+}
+
+.remove-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.remove-btn:hover {
+  background-color: #c82333;
+}
+
+.add-route-btn {
+  display: inline-block;
+  background-color: #28a745;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 5px;
+  font-weight: 500;
+}
+
+.add-route-btn:hover {
+  background-color: #218838;
+}
+
+.submit-btn {
+  display: block;
+  width: 100%;
+  background-color: #007bff;
+  color: white;
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 20px;
+  font-weight: 600;
+}
+
+.submit-btn:hover {
+  background-color: #0069d9;
+}
+
+.status-msg {
+  text-align: center;
+  margin-top: 20px;
+  font-weight: 600;
+}
+
+.status-msg.success {
+  color: #28a745;
+}
+
+.status-msg.error {
+  color: #dc3545;
+}

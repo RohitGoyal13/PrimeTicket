@@ -326,23 +326,42 @@ exports.getRoute = async (req, res) => {
     }
 };
 
-exports.deleteTrain = async (req,res) => {
-    try {
-        const { tid } = req.body;
-        await pool.query("DELETE FROM routes WHERE trainid = $1;", [tid]);
-        await pool.query("DELETE FROM trains WHERE trainid = $1;", [tid]);
-        return res.status(200).json({
-            success: true,
-            message: "Train deleted successfully"
-        });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error"
-        });
+exports.deleteTrain = async (req, res) => {
+  try {
+    const { tid } = req.body;
+
+    if (!tid) {
+      return res.status(400).json({
+        success: false,
+        message: "Train ID is required",
+      });
     }
-}
+
+    // Check if train exists
+    const check = await pool.query("SELECT * FROM trains WHERE trainid = $1;", [tid]);
+    if (check.rows.length === 0) {
+      return res.status(200).json({
+        success: false,
+        message: `No train found with ID ${tid}`,
+      });
+    }
+
+    // Delete related routes first
+    await pool.query("DELETE FROM routes WHERE trainid = $1;", [tid]);
+    await pool.query("DELETE FROM trains WHERE trainid = $1;", [tid]);
+
+    return res.status(200).json({
+      success: true,
+      message: `Train ID ${tid} deleted successfully`,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
 
 
 

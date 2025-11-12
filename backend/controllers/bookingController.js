@@ -147,7 +147,7 @@ exports.searchTicket = async (req, res) => {
         `SELECT 
             to_char(DEPARTURE.CurrentDate, 'YYYY-MM-DD') AS DepartureDate, 
             to_char(ARRIVAL.CurrentDate, 'YYYY-MM-DD') AS ArrivalDate, 
-            ARRIVAL.TimeFromStart - DEPARTURE.TimeFromStart AS Duration, 
+            (ARRIVAL.TimeFromStart - DEPARTURE.TimeFromStart) AS Duration, 
             ARRIVAL.TimeFromStart AS arrivaltime, 
             DEPARTURE.TimeFromStart AS departuretime
          FROM Routes AS DEPARTURE
@@ -158,23 +158,74 @@ exports.searchTicket = async (req, res) => {
            AND ARRIVAL.RouteID = $3`,
         [ticket.sourcestation, ticket.destinationstation, ticket.routeid]
       );
-      let stationDetails = stationDetailsResult.rows[0];
 
-      let [h, m] = train.starttime.split(":").map(Number);
+      const stationDetails = stationDetailsResult.rows[0];
 
-      let dh = (h + Math.floor(stationDetails.departuretime / 60)) % 24;
-      let dm = (m + stationDetails.departuretime % 60) % 60;
-      dh += Math.floor((m + stationDetails.departuretime % 60) / 60);
-      let departureTime = getTime(dh, dm);
+      // Fallback if stationDetails missing
+      if (!stationDetails) {
+        // skip this ticket (or handle as you prefer)
+        continue;
+      }
 
-      dh = (h + Math.floor(stationDetails.arrivaltime / 60)) % 24;
-      dm = (m + stationDetails.arrivaltime % 60) % 60;
-      let arrivalTime = getTime(dh, dm);
+      // Parse train start time (HH:MM)
+      const [startH, startM] = (train.starttime || "00:00").split(":").map(Number);
+
+      // Convert departure/arrival offsets (they are minutes from train start)
+      const depOffsetMin = Number(stationDetails.departuretime); // minutes from train start
+      const arrOffsetMin = Number(stationDetails.arrivaltime); // minutes from train start
+
+      // Absolute minutes from midnight for departure and arrival (relative to same reference start day)
+      const depAbsMin = startH * 60 + startM + depOffsetMin;
+      const arrAbsMin = startH * 60 + startM + arrOffsetMin;
+
+      // Compute time-of-day for departure and arrival (wrap modulo 24*60)
+      const depTodMin = ((depAbsMin % (24 * 60)) + (24 * 60)) % (24 * 60);
+      const arrTodMin = ((arrAbsMin % (24 * 60)) + (24 * 60)) % (24 * 60);
+
+      const depHour = Math.floor(depTodMin / 60);
+      const depMinute = depTodMin % 60;
+      const arrHour = Math.floor(arrTodMin / 60);
+      const arrMinute = arrTodMin % 60;
+
+      // Helper to format HH:MM:SS
+      function formatTime(h, m) {
+        const hh = (h < 10 ? "0" : "") + h;
+        const mm = (m < 10 ? "0" : "") + m;
+        return `${hh}:${mm}:00`;
+      }
+
+      const departureTime = formatTime(depHour, depMinute);
+      const arrivalTime = formatTime(arrHour, arrMinute);
+
+      // Determine how many days to add to departure date to get arrival date
+      // Example: if depAbsMin = 360 (06:00) and arrAbsMin = 1740 (29:00 -> next day 05:00),
+      // floor(1740/1440) - floor(360/1440) = 1 day difference.
+      const depDayIndex = Math.floor(depAbsMin / (24 * 60));
+      const arrDayIndex = Math.floor(arrAbsMin / (24 * 60));
+      const extraDays = arrDayIndex - depDayIndex; // can be 0,1,2,...
+
+      // Use departure date from DB as base (string 'YYYY-MM-DD')
+      const departureDateStr = stationDetails.departuredate; // as provided by DB
+      // compute arrival date by adding extraDays to departureDateStr
+      const depDateObj = new Date(departureDateStr + "T00:00:00"); // treat as local date
+      const arrDateObj = new Date(depDateObj);
+      arrDateObj.setDate(depDateObj.getDate() + extraDays);
+
+      // format back to YYYY-MM-DD
+      function formatDateYYYYMMDD(d) {
+        const y = d.getFullYear();
+        const mm = (d.getMonth() + 1).toString().padStart(2, "0");
+        const dd = d.getDate().toString().padStart(2, "0");
+        return `${y}-${mm}-${dd}`;
+      }
+
+      const departureDate = formatDateYYYYMMDD(depDateObj);
+      const arrivalDate = formatDateYYYYMMDD(arrDateObj);
 
       const passengersResult = await pool.query(
-      `SELECT name, age, gender FROM Passengers WHERE TicketID = $1;`,
-      [ticket.ticketid]
-            );
+        `SELECT name, age, gender FROM Passengers WHERE TicketID = $1;`,
+        [ticket.ticketid]
+      );
 
       bookings.push({
         trainName: train.trainname,
@@ -182,13 +233,13 @@ exports.searchTicket = async (req, res) => {
         noOfPassengers: ticket.noofpassenger,
         departureStation: ticket.sourcestation,
         departureTime,
-        departureDate: stationDetails.departuredate,
-        durationHours: Math.floor(stationDetails.duration / 60),
-        durationMinutes: stationDetails.duration % 60,
+        departureDate,
+        durationHours: Math.floor(Number(stationDetails.duration) / 60),
+        durationMinutes: Number(stationDetails.duration) % 60,
         runsOn: train.runson,
         arrivalStation: ticket.destinationstation,
         arrivalTime,
-        arrivalDate: stationDetails.arrivaldate,
+        arrivalDate,
         ticketId: ticket.ticketid,
         email: ticket.email,
         contactno: ticket.contactno,
@@ -209,6 +260,7 @@ exports.searchTicket = async (req, res) => {
     });
   }
 };
+
 
 
 exports.allTickets = async (req, res) => {
