@@ -165,3 +165,88 @@ catch(err){
     })
 }
 }
+
+//forget passward 
+
+const crypto = require("crypto");
+
+exports.forgotPassword = async (req, res) => {
+  const { email, role } = req.body; // role = 'user' or 'admin'
+
+  if (!email || !role) {
+    return res.status(400).json({ success: false, message: "Email and role required" });
+  }
+
+  const table = role === "admin" ? "admins" : "users";
+  const column = role === "admin" ? "adminemail" : "email";
+
+  try {
+    const result = await pool.query(`SELECT * FROM ${table} WHERE ${column} = $1`, [
+      email.toLowerCase(),
+    ]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Account not found" });
+    }
+
+    // Create reset token
+    const token = crypto.randomBytes(20).toString("hex");
+
+    // Store temporarily (could add reset_tokens table)
+    await pool.query(
+      `UPDATE ${table} SET reset_token = $1, reset_expires = NOW() + INTERVAL '15 MINUTE' WHERE ${column} = $2`,
+      [token, email.toLowerCase()]
+    );
+
+    // In production, send via email — for now, just return token
+    return res.status(200).json({
+      success: true,
+      message: "Reset token generated",
+      token,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// reset password
+
+exports.resetPassword = async (req, res) => {
+  const { token, role, newPassword } = req.body;
+  const table = role === "admin" ? "admins" : "users";
+  const column = role === "admin" ? "adminemail" : "email";
+
+  if (!token || !newPassword || !role) {
+    return res.status(400).json({ success: false, message: "All fields required" });
+  }
+
+  try {
+    const result = await pool.query(
+      `SELECT * FROM ${table} WHERE reset_token = $1 AND reset_expires > NOW()`,
+      [token]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired token",
+      });
+    }
+
+    const user = result.rows[0];
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    await pool.query(
+      `UPDATE ${table} SET password = $1, reset_token = NULL, reset_expires = NULL WHERE ${column} = $2`,
+      [hashed, user[column]]
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};

@@ -4,6 +4,8 @@ import "../styles/register.css";
 
 const Register = () => {
   const navigate = useNavigate();
+  const [role, setRole] = useState("user");
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -27,10 +29,25 @@ const Register = () => {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:5050/api/auth/register", {
+      const url =
+        role === "admin"
+          ? "http://localhost:5050/api/admin/register"
+          : "http://localhost:5050/api/auth/register";
+
+      let bodyData;
+      if (role === "admin") {
+        bodyData = {
+          email: formData.email,
+          password: formData.password,
+        };
+      } else {
+        bodyData = { ...formData };
+      }
+
+      const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(bodyData),
       });
 
       const data = await res.json();
@@ -40,10 +57,7 @@ const Register = () => {
         return;
       }
 
-      // ✅ Show success overlay
       setOverlay(true);
-
-      // redirect after 2 sec
       setTimeout(() => {
         navigate("/login");
       }, 2000);
@@ -75,49 +89,89 @@ const Register = () => {
 
         <div className="right">
           <h1>Register</h1>
+
+          {/* 🔹 Role Toggle */}
+          <div className="role-toggle">
+            <button
+              type="button"
+              className={role === "user" ? "active" : ""}
+              onClick={() => setRole("user")}
+            >
+              User
+            </button>
+            <button
+              type="button"
+              className={role === "admin" ? "active" : ""}
+              onClick={() => setRole("admin")}
+            >
+              Admin
+            </button>
+          </div>
+
           <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              placeholder="First Name"
-              name="firstName"
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Last Name"
-              name="lastName"
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              name="email"
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Contact Number"
-              name="contactno"
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              name="password"
-              onChange={handleChange}
-              required
-            />
+            {role === "user" ? (
+              <>
+                <input
+                  type="text"
+                  placeholder="First Name"
+                  name="firstName"
+                  onChange={handleChange}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Last Name"
+                  name="lastName"
+                  onChange={handleChange}
+                  required
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  name="email"
+                  onChange={handleChange}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Contact Number"
+                  name="contactno"
+                  onChange={handleChange}
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  name="password"
+                  onChange={handleChange}
+                  required
+                />
+              </>
+            ) : (
+              <>
+                <input
+                  type="email"
+                  placeholder="Admin Email"
+                  name="email"
+                  onChange={handleChange}
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder="Admin Password"
+                  name="password"
+                  onChange={handleChange}
+                  required
+                />
+              </>
+            )}
+
             {error && <p className="error">{error}</p>}
             <button type="submit">Register</button>
           </form>
         </div>
       </div>
 
-      {/* ✅ Overlay */}
       {overlay && (
         <div className="overlay">
           <div className="overlay-card">

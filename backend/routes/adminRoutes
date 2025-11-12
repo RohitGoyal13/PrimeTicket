@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const {adminLogin} = require("../controllers/adminControllers");
+const {adminLogin, adminRegister} = require("../controllers/adminControllers");
 const {protectAdmin} = require("../middleware/adminMiddleware");
 
 
+router.post("/register", adminRegister);
 router.post("/login" , adminLogin);
 
 router.get("/", protectAdmin, (req, res) => {
