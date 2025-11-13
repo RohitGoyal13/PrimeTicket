@@ -86,7 +86,7 @@ const Payment = () => {
 
               // 👉 Verify Payment
               const verifyRes = await axios.post(
-                "http://localhost:5050/api/payment/verify-payment",
+                `${BASE_URL}/api/payment/verify-payment`,
                 {
                   ...response,
                   bookingData: safeBookingData,

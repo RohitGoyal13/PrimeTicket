@@ -27,7 +27,6 @@ const STATIONS = [
   {   name: "Howrah" },
 ];
 
-const API_BASE = "http://localhost:5050";
 
 function getToday() {
   return new Date().toISOString().slice(0, 10);
