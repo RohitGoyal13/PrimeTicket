@@ -1,13 +1,11 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import "../styles/dashboard.css";
+import "../styles/admin-dashboard.css";
 import { FaTrain } from "react-icons/fa";
 import { MdSwapHoriz } from "react-icons/md";
 import { FaRegCalendarAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 import axios from "axios";
-
-
 
 const images = [
   "images/train1.jpg",
@@ -18,13 +16,13 @@ const images = [
 ];
 
 const STATIONS = [
-  {   name: "Delhi" },
-  {   name: "Nagpur" },
-  {   name: "Lucknow" },
-  {   name: "Kanpur" },
-  {   name: "Bhopal" },
-  {   name: "Mumbai" },
-  {   name: "Howrah" },
+  { name: "Delhi" },
+  { name: "Nagpur" },
+  { name: "Lucknow" },
+  { name: "Kanpur" },
+  { name: "Bhopal" },
+  { name: "Mumbai" },
+  { name: "Howrah" },
 ];
 
 const API_BASE = "http://localhost:5050";
@@ -33,26 +31,21 @@ function getToday() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function Dashboard() {
+function AdminDashboard() {
   const [current, setCurrent] = useState(0);
   const navigate = useNavigate();
 
-  // search state
   const [from, setFrom] = useState({ name: "Delhi" });
   const [to, setTo] = useState({ name: "Nagpur" });
   const [date, setDate] = useState(getToday());
-
-  // station picker modal
-  const [openPicker, setOpenPicker] = useState(null); // "from" | "to" | null
+  const [openPicker, setOpenPicker] = useState(null);
   const [query, setQuery] = useState("");
   const cardRef = useRef(null);
 
   const filteredStations = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return STATIONS.slice(0, 25);
-    return STATIONS.filter(
-      s => s.name.toLowerCase().includes(q)
-    ).slice(0, 30);
+    return STATIONS.filter((s) => s.name.toLowerCase().includes(q)).slice(0, 30);
   }, [query]);
 
   useEffect(() => {
@@ -63,9 +56,12 @@ function Dashboard() {
   }, []);
 
   useEffect(() => {
-    function onKey(e){ if (e.key === "Escape") setOpenPicker(null); }
-    function onDoc(e){
-      if (openPicker && cardRef.current && !cardRef.current.contains(e.target)) setOpenPicker(null);
+    function onKey(e) {
+      if (e.key === "Escape") setOpenPicker(null);
+    }
+    function onDoc(e) {
+      if (openPicker && cardRef.current && !cardRef.current.contains(e.target))
+        setOpenPicker(null);
     }
     document.addEventListener("keydown", onKey);
     document.addEventListener("mousedown", onDoc);
@@ -86,41 +82,13 @@ function Dashboard() {
       return;
     }
     try {
-      const payload = {
-        departure: from.name,
-        arrival: to.name,
-        date,
-      };
-
-      console.log("Payload:", payload);
-
+      const payload = { departure: from.name, arrival: to.name, date };
       const res = await axios.post(`${API_BASE}/api/trains/search`, payload);
-
-    console.table(JSON.parse(JSON.stringify(res.data.data)));
-
-       console.log("✅ Full API response:", res.data);
-
-    // If train list is in res.data.data
-    if (res.data?.data) {
-      console.log("🚆 Train list:", res.data.data);
-    } else {
-      console.log("⚠️ No train list found in response");
-    }
-
       localStorage.setItem("trainResults", JSON.stringify(res.data?.data || []));
-
-      setTimeout(() => {
-        navigate("/results", {
-      state: {
-    from: from.name,
-    to: to.name,
-    date,
-    results: res.data?.data || [],
-  },
-});  
-      }, );
-    } 
-    catch (err) {
+      navigate("/results", {
+        state: { from: from.name, to: to.name, date, results: res.data?.data || [] },
+      });
+    } catch (err) {
       console.error(err);
       alert(err?.response?.data?.message || "Search failed");
     }
@@ -128,15 +96,22 @@ function Dashboard() {
 
   return (
     <div className="page">
-      {/* Navbar */}
-      <header className="navbar">
-       <div className="logo"> <h2 ><img src="images/applogo.png" alt="" className="applogo" /></h2></div>
-        <nav>
-          <a href="#">Flights</a>
-          <a href="#">Hotels</a>
-          <a href="#">Support</a>
-          <a href="#">Trips</a>
-          <a href="#">Wallet</a>
+      {/* 🟣 Admin Navbar */}
+      <header className="navbar admin-navbar">
+        <div className="logo">
+          <img src="images/applogo.png" alt="PrimeTicket" className="applogo" />
+        </div>
+
+        <nav className="admin-nav-buttons">
+          <button className="nav-btn add" onClick={() => navigate("/addtrain")}>
+            ➕ Add Train
+          </button>
+          <button className="nav-btn delete" onClick={() => navigate("/deletetrain")}>
+            ❌ Delete Train
+          </button>
+          <button className="nav-btn normal" onClick={() => navigate("/")}>
+            🚆 User Dashboard
+          </button>
         </nav>
       </header>
 
@@ -150,24 +125,36 @@ function Dashboard() {
 
           <div className="search-form">
             {/* FROM */}
-            <div className="source" onClick={() => { setOpenPicker("from"); setQuery(""); }}>
+            <div
+              className="source"
+              onClick={() => {
+                setOpenPicker("from");
+                setQuery("");
+              }}
+            >
               <FaTrain size={50} color="green" />
               <div className="label-container cursor-pointer">
-                <label htmlFor="source-station">From</label>
+                <label>From</label>
                 <span>{from.name}</span>
               </div>
             </div>
 
             {/* SWAP */}
-            <button className="swap-btn" type="button" onClick={swapStations} aria-label="Swap">
+            <button className="swap-btn" onClick={swapStations}>
               <MdSwapHoriz size={28} />
             </button>
 
             {/* TO */}
-            <div className="destination" onClick={() => { setOpenPicker("to"); setQuery(""); }}>
+            <div
+              className="destination"
+              onClick={() => {
+                setOpenPicker("to");
+                setQuery("");
+              }}
+            >
               <FaTrain size={50} color="green" />
               <div className="label-container cursor-pointer">
-                <label htmlFor="dest-station">To</label>
+                <label>To</label>
                 <span>{to.name}</span>
               </div>
             </div>
@@ -176,9 +163,8 @@ function Dashboard() {
             <div className="date-container">
               <FaRegCalendarAlt size={50} color="green" />
               <div className="label-container cursor-pointer">
-                <label htmlFor="journey-date">Departure Date</label>
+                <label>Departure Date</label>
                 <input
-                  id="journey-date"
                   type="date"
                   value={date}
                   min={getToday()}
@@ -189,14 +175,14 @@ function Dashboard() {
 
             {/* SEARCH */}
             <div className="train-search">
-              <button className="train-search-button" type="button" onClick={onSearch}>
+              <button className="train-search-button" onClick={onSearch}>
                 Search
               </button>
             </div>
           </div>
         </div>
 
-        {/* Image Carousel */}
+        {/* Carousel */}
         <div className="carousel">
           {images.map((img, index) => (
             <img
@@ -237,7 +223,10 @@ function Dashboard() {
         <div className="footer-top">
           <div className="footer-section">
             <h3>PrimeTicket</h3>
-            <p>Your trusted partner for IRCTC train ticket booking, live train status, and hassle-free travel planning.</p>
+            <p>
+              Your trusted partner for IRCTC train ticket booking, live train
+              status, and hassle-free travel planning.
+            </p>
           </div>
 
           <div className="footer-section">
@@ -310,9 +299,8 @@ function Dashboard() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
 
-export default Dashboard;
+export default AdminDashboard;

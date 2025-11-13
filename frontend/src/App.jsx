@@ -9,6 +9,7 @@ import Payment from "./pages/payment.jsx";
 import MyBookings from "./pages/mybookings.jsx";
 import AddTrain from "./pages/addtrain.jsx";
 import DeleteTrain from "./pages/deletetrain.jsx";
+import AdminDashboard from "./pages/admin-dashboard.jsx";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/mybookings" element={<MyBookings/>}></Route>
         <Route path="/addtrain" element={<AddTrain/>}></Route>
         <Route path="/deletetrain" element={<DeleteTrain/>}></Route>
+        <Route path="/admin-dashboard" element={<AdminDashboard/>}></Route>
       </Routes>
       </Router>
     </>

@@ -20,7 +20,7 @@ function Bookaticket() {
   const location = useLocation();
 
   // ✅ Restore train selection from location.state or localStorage
-  const {train, price,from,to} = 
+  const {train, price, from, to} = 
     location.state ||
     JSON.parse(localStorage.getItem("selectedTrain")) || {};
 
@@ -30,14 +30,14 @@ function Bookaticket() {
 
   // Save train to localStorage when available
   useEffect(() => {
-  if (location.state) {
-    const { train, from, to, price } = location.state;
-    localStorage.setItem(
-      "selectedTrain",
-      JSON.stringify({ train, from, to, price })
-    );
-  }
-    }, [location.state]);
+    if (location.state) {
+      const { train, from, to, price } = location.state;
+      localStorage.setItem(
+        "selectedTrain",
+        JSON.stringify({ train, from, to, price })
+      );
+    }
+  }, [location.state]);
 
   // handle passenger change
   const handleFormChange = (event, index) => {
@@ -65,7 +65,7 @@ function Bookaticket() {
     setFormFields(data);
   };
 
-  // submit form
+  // submit form (kept identical)
   const submitForm = (e) => {
     e.preventDefault();
     setError("");
@@ -89,13 +89,13 @@ function Bookaticket() {
       return;
     }
 
-        const formData = {
+    const formData = {
       passengers: formFields.map(({ id, ...rest }) => rest),
       email: contactInfo.email,
       contactno: contactInfo.contact,
       userId: userId,
-      routeId: train.routeId || 18,
-      trainId: train.trainid || 10,
+      routeId: train.routeId || train.routeid,
+      trainId: train.trainId || train.trainid,
       sourceStation: from || train?.departure || "Unknown",
       destinationStation: to || train?.arrival || "Unknown",
       price: (price || basePrice || 500) * formFields.length,
@@ -111,21 +111,62 @@ function Bookaticket() {
   };
 
 
+  // UI helpers (no logic change)
+  const passengerCount = formFields.length;
+  const computedPrice = (price || basePrice || 500) * passengerCount;
+
   return (
     <div className="bookaticket">
+      <div className="book-top">
+        <div className="selected-train-card">
+          <div className="train-row">
+            <div className="train-title">
+              <h3>
+               {(train?.trainName || train?.trainname || "Selected Train").toUpperCase()}</h3>
+              <p className="small muted">{train?.trainid ? `Train ID: ${train.trainid}` : ""}</p>
+            </div>
+            <div className="route">
+              <div className="station">{from || train?.departure || "Src"}</div>
+              <div className="arrow">→</div>
+              <div className="station">{to || train?.arrival || "Dst"}</div>
+            </div>
+            <div className="date-price">
+              <div className="date">{location.state?.date || new Date().toISOString().slice(0,10)}</div>
+              <div className="price">₹{computedPrice.toLocaleString()}</div>
+            </div>
+          </div>
+          <div className="train-meta">
+            <span className="pill">{passengerCount} Passenger{passengerCount>1?'s':''}</span>
+            <span className="pill">{train?.remainingSeats ?? "—"} seats left</span>
+            <span className="pill">Class: General</span>
+          </div>
+        </div>
+      </div>
+
       <h2>Passenger Details</h2>
       <div>
         <form onSubmit={submitForm}>
           <div className="repeat-passenger-container">
             {formFields.map((form, index) => (
-              <div key={form.id}>
-                <div>
-                  <h5>Passenger</h5>
+              <div key={form.id} className="passenger-card">
+                <div className="passenger-header">
+                  <h5>Passenger {index + 1}</h5>
+                  {formFields.length > 1 && (
+                    <Button
+                      color="warning"
+                      variant="outlined"
+                      onClick={() => removeFields(index)}
+                      size="small"
+                    >
+                      Remove
+                    </Button>
+                  )}
                 </div>
+
                 <div className="repeat-passenger-flex">
                   <div className="repeat-passenger-flex-child">
                     <TextField
-                      sx={{ width: 319 }}
+                      sx={{ width: "100%" }}
                       required
                       name="name"
                       label="Name"
@@ -135,7 +176,7 @@ function Bookaticket() {
                   </div>
                   <div className="repeat-passenger-flex-child">
                     <TextField
-                      sx={{ width: 319 }}
+                      sx={{ width: "100%" }}
                       required
                       name="age"
                       type="number"
@@ -146,36 +187,40 @@ function Bookaticket() {
                   </div>
                   <div className="repeat-passenger-flex-child">
                     <Select
-                      sx={{ width: 319 }}
+                      sx={{ width: "100%" }}
                       required
                       name="gender"
                       value={form.gender}
-                      label="Gender"
+                      displayEmpty
                       onChange={(event) => handleFormChange(event, index)}
                     >
+                      <MenuItem value={""} disabled>
+                        Gender
+                      </MenuItem>
                       <MenuItem value={"M"}>Male</MenuItem>
                       <MenuItem value={"F"}>Female</MenuItem>
                       <MenuItem value={"O"}>Others</MenuItem>
                     </Select>
                   </div>
-                  <div className="repeat-passenger-flex-child">
-                    {formFields.length > 1 && (
-                      <Button
-                        color="warning"
-                        variant="contained"
-                        onClick={() => removeFields(index)}
-                      >
-                        Remove Passenger
-                      </Button>
-                    )}
-                  </div>
                 </div>
               </div>
             ))}
-            <div>
+
+            <div className="add-passenger-row">
               <Button onClick={addFields} color="success" variant="contained">
-                Add Passenger
+                + Add Passenger
               </Button>
+
+              <div className="fare-summary">
+                <div>
+                  <div className="small muted">Fare per passenger</div>
+                  <div className="big">₹{(price || basePrice || 500).toLocaleString()}</div>
+                </div>
+                <div>
+                  <div className="small muted">Total (incl fees)</div>
+                  <div className="big total">₹{computedPrice.toLocaleString()}</div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -211,13 +256,23 @@ function Bookaticket() {
 
           {error && <p className="error">{error}</p>}
 
-          <Button
-            sx={{ backgroundColor: "#4CAF50" }}
-            type="submit"
-            variant="contained"
-          >
-            Pay and Book Ticket
-          </Button>
+          <div className="pay-row">
+            <Button
+              sx={{ backgroundColor: "#4CAF50" }}
+              type="submit"
+              variant="contained"
+            >
+              Pay and Book Ticket — ₹{computedPrice.toLocaleString()}
+            </Button>
+
+            <Button
+              sx={{ marginLeft: 2 }}
+              variant="outlined"
+              onClick={() => navigate(-1)}
+            >
+              ← Back
+            </Button>
+          </div>
         </form>
       </div>
 
@@ -227,6 +282,7 @@ function Bookaticket() {
           <div className="overlay-card">
             <h2>💳 Redirecting you to Payment Page...</h2>
             <p>Please wait while we set things up.</p>
+            <div className="loader" />
           </div>
         </div>
       )}
