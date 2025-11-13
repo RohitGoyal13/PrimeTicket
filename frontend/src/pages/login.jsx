@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/login.css";
 import BASE_URL from "../api";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -135,12 +136,13 @@ const Login = () => {
           </p>
           <span>
             Don't have an account?{" "}
-            <a
-              href="/register"
-              style={{ color: "rgb(71, 255, 86)", fontWeight: "bold" }}
-            >
-              Signup
-            </a>
+                    <Link
+            to="/register"
+            style={{ color: "rgb(71, 255, 86)", fontWeight: "bold" }}
+          >
+            Signup
+          </Link>
+
           </span>
         </div>
 
