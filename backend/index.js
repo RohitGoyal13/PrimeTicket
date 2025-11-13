@@ -1,3 +1,4 @@
+
 require("dotenv").config();
 const pool = require("./config/connect");
 const express = require("express");
@@ -21,6 +22,8 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+
 
 // login routes
 
