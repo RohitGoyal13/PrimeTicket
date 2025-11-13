@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../styles/mybookings.css";
+import BASE_URL from "../api";
 
 function MyBookings() {
   const [bookings, setBookings] = useState([]);
@@ -14,7 +15,7 @@ function MyBookings() {
 
     const fetchBookings = async () => {
       try {
-        const res = await axios.post("http://localhost:5050/api/booking/search", {
+        const res = await axios.post(`${BASE_URL}/api/booking/search`, {
           uid: userId,
         });
 
@@ -45,7 +46,7 @@ function MyBookings() {
     if (!selectedTicket) return;
 
     try {
-      const res = await axios.post("http://localhost:5050/api/booking/delete", {
+      const res = await axios.post(`${BASE_URL}/api/booking/delete`, {
         tid: selectedTicket,
       });
 

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "../styles/addtrain.css";
+import BASE_URL from "../api";
 
 function AddTrain(){
   const [trainName, setTrainName] = useState("");
@@ -60,7 +61,7 @@ const handleSubmit = async (e) => {
 
   try {
     const res = await axios.post(
-      "http://localhost:5050/api/trains/add", // your backend URL
+      `${BASE_URL}/api/trains/add`, // your backend URL
       {
         trainName,
         runson,

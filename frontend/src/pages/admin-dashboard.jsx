@@ -6,6 +6,7 @@ import { FaRegCalendarAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 import axios from "axios";
+import BASE_URL from "../api";
 
 const images = [
   "images/train1.jpg",
@@ -83,7 +84,7 @@ function AdminDashboard() {
     }
     try {
       const payload = { departure: from.name, arrival: to.name, date };
-      const res = await axios.post(`${API_BASE}/api/trains/search`, payload);
+      const res = await axios.post(`${BASE_URL}/api/trains/search`, payload);
       localStorage.setItem("trainResults", JSON.stringify(res.data?.data || []));
       navigate("/results", {
         state: { from: from.name, to: to.name, date, results: res.data?.data || [] },

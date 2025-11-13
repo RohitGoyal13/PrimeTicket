@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/register.css";
+import BASE_URL from "../api";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -31,8 +32,8 @@ const Register = () => {
     try {
       const url =
         role === "admin"
-          ? "http://localhost:5050/api/admin/register"
-          : "http://localhost:5050/api/auth/register";
+          ? `${BASE_URL}/api/admin/register`
+          : `${BASE_URL}/api/auth/register`;
 
       let bodyData;
       if (role === "admin") {

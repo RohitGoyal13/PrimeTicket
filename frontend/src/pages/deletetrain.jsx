@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "../styles/deletetrain.css";
+import BASE_URL from "../api";
 
 function DeleteTrain() {
   const [trainId, setTrainId] = useState("");
@@ -11,7 +12,7 @@ function DeleteTrain() {
   const handleDelete = async () => {
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:5050/api/trains/delete", {
+      const res = await axios.post(`${BASE_URL}/api/trains/delete`, {
         tid: parseInt(trainId),
       });
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/login.css";
+import BASE_URL from "../api";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -37,8 +38,8 @@ const Login = () => {
     try {
       const url =
         role === "admin"
-          ? "http://localhost:5050/api/admin/login"
-          : "http://localhost:5050/api/auth/login";
+          ? `${BASE_URL}/api/admin/login`
+          : `${BASE_URL}/api/auth/login`;
 
       const res = await fetch(url, {
         method: "POST",
@@ -75,7 +76,7 @@ const Login = () => {
     }
     setError("");
     try {
-      const res = await fetch("http://localhost:5050/api/auth/forgotPassword", {
+      const res = await fetch(`${BASE_URL}/api/auth/forgotPassword`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: forgotEmail, role })
@@ -100,7 +101,7 @@ const Login = () => {
       return;
     }
     try {
-      const res = await fetch("http://localhost:5050/api/auth/resetPassword", {
+      const res = await fetch(`${BASE_URL}/api/auth/resetPassword`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: resetToken, newPassword, role })

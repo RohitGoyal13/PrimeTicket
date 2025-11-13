@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/payment.css";
+import BASE_URL from "../api";
 
 const Payment = () => {
   const location = useLocation();
@@ -50,7 +51,7 @@ const Payment = () => {
       try {
         // 👉 Create Order on backend
         const orderRes = await axios.post(
-          "http://localhost:5050/api/payment/create-order",
+          `${BASE_URL}/api/payment/create-order`,
           {
             amount: bookingData.price,
             currency: "INR",

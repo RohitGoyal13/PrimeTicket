@@ -6,7 +6,7 @@ import { FaRegCalendarAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 import axios from "axios";
-
+import BASE_URL from "../api";
 
 
 const images = [
@@ -94,7 +94,7 @@ function Dashboard() {
 
       console.log("Payload:", payload);
 
-      const res = await axios.post(`${API_BASE}/api/trains/search`, payload);
+      const res = await axios.post(`${BASE_URL}/api/trains/search`, payload);
 
     console.table(JSON.parse(JSON.stringify(res.data.data)));
 
