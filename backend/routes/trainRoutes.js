@@ -8,6 +8,6 @@ router.post("/search", searchTrains);
 router.post("/add", addTrain);
 router.post("/route", getRoute);
 router.post("/delete", deleteTrain);
-router.post("/health", healthCheck);
+router.get("/health", healthCheck);
 
 module.exports = router;
