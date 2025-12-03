@@ -1,5 +1,5 @@
 const express = require("express");
-const {allTrains , searchTrains, addTrain, getRoute, deleteTrain} = require("../controllers/trainController");
+const {allTrains , searchTrains, addTrain, getRoute, deleteTrain, healthCheck} = require("../controllers/trainController");
 
 const router = express.Router();
 
@@ -8,5 +8,6 @@ router.post("/search", searchTrains);
 router.post("/add", addTrain);
 router.post("/route", getRoute);
 router.post("/delete", deleteTrain);
+router.post("/health", healthCheck);
 
 module.exports = router;
